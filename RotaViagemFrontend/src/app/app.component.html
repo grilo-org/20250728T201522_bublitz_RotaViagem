@@ -1,0 +1,47 @@
+<div class="container">
+  <h1>Cadastro de Rotas</h1>
+
+  <form [formGroup]="rotaForm" (ngSubmit)="adicionarRota()">
+    <input formControlName="origem" placeholder="Origem" />
+    <input formControlName="destino" placeholder="Destino" />
+    <input formControlName="valor" type="number" placeholder="Valor" />
+    <button type="submit">Adicionar Rota</button>
+  </form>
+
+  <h2>Rotas Cadastradas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Origem</th>
+        <th>Destino</th>
+        <th>Valor</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rota of rotas">
+        <td>{{ rota.origem }}</td>
+        <td>{{ rota.destino }}</td>
+        <td>{{ rota.valor }}</td>
+        <td>
+          <button (click)="deletarRota(rota)">Excluir</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h1>Consulta de Melhor Rota</h1>
+  <div>
+    <input #origemInput placeholder="Origem" />
+    <input #destinoInput placeholder="Destino" />
+    <button
+      (click)="consultarMelhorRota(origemInput.value, destinoInput.value)"
+    >
+      Consultar
+    </button>
+  </div>
+  <div *ngIf="resultadoConsulta">
+    <h3>Resultado:</h3>
+    <p>{{ resultadoConsulta }}</p>
+  </div>
+</div>
