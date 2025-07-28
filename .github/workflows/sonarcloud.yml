@@ -1,0 +1,54 @@
+name: "SonarCloud Analysis"
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch: {}
+
+jobs:
+  sonar-scan:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detectar a Raiz do Projeto (Universal)
+        id: find-root
+        shell: bash
+        run: |
+          # CORREÇÃO: Lista reordenada para priorizar marcadores de projeto principal
+          MARKER_FILES=(
+            "pubspec.yaml" "package.json" "composer.json" 
+            "pom.xml" "go.mod" "Gemfile" 
+            "pyproject.toml" "Package.swift" "*.csproj"
+            "build.gradle" "build.gradle.kts" "requirements.txt"
+          )
+          PROJECT_DIR="."
+          
+          for marker in "${MARKER_FILES[@]}"; do
+            # Usando -path para evitar encontrar arquivos em diretórios como .git
+            path=$(find . -not -path "./.git/*" -name "$marker" -print -quit)
+            if [ -n "$path" ]; then
+              PROJECT_DIR=$(dirname "$path")
+              echo "Projeto detectado em: $PROJECT_DIR (marcador: $marker)"
+              break
+            fi
+          done
+          
+          echo "Diretório final do projeto: $PROJECT_DIR"
+          echo "PROJECT_PATH=$PROJECT_DIR" >> $GITHUB_ENV
+
+
+
+      - name: SonarCloud Scan (Universal)
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ${{ env.PROJECT_PATH }}
+          args: >
+            -Dsonar.projectKey=grilo-org_20250728T201522_bublitz_RotaViagem -Dsonar.organization=grilo-org 
